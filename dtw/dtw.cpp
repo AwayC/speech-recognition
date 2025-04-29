@@ -4,8 +4,9 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#define pr(x) std::cerr << #x << ": " << x << std::endl;
 
-double Dtw::get_cost(const std::vector<double>& src, const std::vector<double> &t, int radius) {
+int Dtw::get_cost(const std::vector<uint16_t>& src, const std::vector<uint16_t> &t, int radius) {
     Ts s = {0, src.size()}; 
     Ts ts = {src.size(), t.size()}; 
     buf_len = src.size() + t.size(); 
@@ -14,14 +15,14 @@ double Dtw::get_cost(const std::vector<double>& src, const std::vector<double> &
         buf[i] = src[i];
     for (int i = ts.head;i < ts.head + ts.len;i ++)
         buf[i] = t[i - ts.head];
-    double ret = Fast_dtw(s, ts, radius);
+    int ret = Fast_dtw(s, ts, radius);
     buf_len = 0;
     buf.clear(); 
     path.clear();
     return ret; 
 }
 
-double Dtw::Fast_dtw(Ts &src, Ts &t, int radius) {
+int Dtw::Fast_dtw(Ts &src, Ts &t, int radius) {
     if(src.len <= radius || t.len <= radius) {
         Win* w = new Win(src.len); 
         for(int i = 0;i < src.len;i ++) { 
@@ -29,6 +30,8 @@ double Dtw::Fast_dtw(Ts &src, Ts &t, int radius) {
         }
         double ret = Path_dtw(src, t, w);
         delete w;
+        // pr(ret);
+        // pr(src.len);
         return ret; 
     }
 
@@ -39,7 +42,8 @@ double Dtw::Fast_dtw(Ts &src, Ts &t, int radius) {
     coarse(src, s1);
     coarse(t, s2);
 
-    double ret = Fast_dtw(s1, s2, radius);
+    int ret = Fast_dtw(s1, s2, radius);
+
     if (ret == -1)
     {
         buf_len -= (src.len + 1) / 2 + (t.len + 1) / 2;
@@ -50,17 +54,19 @@ double Dtw::Fast_dtw(Ts &src, Ts &t, int radius) {
     coarse_path(src, t, w, radius);
 
     ret = Path_dtw(src, t, w);
+    // pr(ret);
+    // pr(src.len);
     delete w; 
     return ret;
 }
 
 #define PATH_MX 0x3f3f3f3f
 #define COST_MX 1e9
-double Dtw::Path_dtw(Ts &src, Ts &t, Win *w)  {
+int Dtw::Path_dtw(Ts &src, Ts &t, Win *w)  {
     size_t len1 = src.len, len2 = t.len;
-    double brk = break_val * (len1 + len2);
+    int brk = break_val * (len1 + len2);
     bool brk_flag = false;
-    std::vector<std::vector<double>> cost(len1, std::vector<double>());
+    std::vector<std::vector<int>> cost(len1, std::vector<int>());
     std::vector<std::vector<pathPoint>> prev(len1, std::vector<pathPoint>());
     for (int i = 0;i < len1;i ++) {
         cost[i].resize(w->at(i).second - w->at(i).first + 1);
@@ -76,11 +82,11 @@ double Dtw::Path_dtw(Ts &src, Ts &t, Win *w)  {
     }
 
     for(int i = 1;i < len1;i ++) {
-        double mn = COST_MX;
+        int mn = COST_MX;
         for (int j = 0;j < cost[i].size();j ++)
         {
             int act = j + w->at(i).first;
-            double mn_cost = COST_MX;
+            int mn_cost = COST_MX;
             pathPoint mn_prev = {-1, -1};
             int pre_l = w->at(i - 1).first, pre_r = w->at(i - 1).second;
             if (act >= pre_l && act <= pre_r && cost[i - 1][act - pre_l] < mn_cost) // up

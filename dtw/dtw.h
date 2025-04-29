@@ -17,19 +17,19 @@ typedef struct {
     int x, y; 
 } pathPoint; 
 
-#define MAX_BREAK 1e15
+#define MAX_BREAK (1 << 14)
 
 class Dtw { 
     using Win = std::vector<std::pair<int, int> > ; 
 public: 
     Dtw(){}; 
     ~Dtw(){}; 
-    double get_cost(const std::vector<double>& src,
-                    const std::vector<double> &t, 
+    int get_cost(const std::vector<uint16_t>& src,
+                    const std::vector<uint16_t> &t,
                     int radius);
-    double Fast_dtw(Ts &src, Ts &t, int radius); 
-    double Path_dtw(Ts &src, Ts &t, Win *w);
-    void set_brkVal(double x)
+    int Fast_dtw(Ts &src, Ts &t, int radius);
+    int Path_dtw(Ts &src, Ts &t, Win *w);
+    void set_brkVal(int x)
     {
         break_val = x;
     };
@@ -37,11 +37,11 @@ public:
 
 private: 
     int radius;
-    double break_val = MAX_BREAK;
-    std::vector<double> buf; 
+    int break_val = MAX_BREAK;
+    std::vector<uint16_t> buf;
     size_t buf_len; 
     std::vector<pathPoint> path; 
-    static double distance(double a, double b) { return fabs(a - b); };
+    static int distance(uint16_t a, uint16_t b) { return abs(a - b); };
     void coarse(Ts &src, Ts &t); 
     void coarse_path(Ts &src, Ts &t, Win* w, int radius);
     

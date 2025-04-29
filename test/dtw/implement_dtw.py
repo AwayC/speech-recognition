@@ -19,15 +19,17 @@ if __name__ == "__main__":
     all_data = np.loadtxt('series1.txt')
     
     # 提取前 256 个数到 s1
-    s1 = all_data[:256]
+    s1 = all_data[:32]
     # 提取接下来的 256 个数到 s2
-    s2 = all_data[256:512]
+    s2 = all_data[32:64]
+    print(s1)
+    print(s2)
 
     # 使用标准 DTW 算法计算距离
     dtw_distance = dtw(s1, s2)
 
     # 使用 fastdtw 库计算距离
-    fast_dtw_distance, path = fastdtw(s1, s2)
+    # fast_dtw_distance, path = fastdtw(s1, s2)
 
     print(f"标准 DTW 距离: {dtw_distance}")
-    print(f"FastDTW 距离: {fast_dtw_distance}")
+    # print(f"FastDTW 距离: {fast_dtw_distance}")

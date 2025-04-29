@@ -4,10 +4,10 @@
 #include "dtw.h"
 #include "iostream"
 
-#define DTW_LEN 256
+#define DTW_LEN 32
 using namespace std;
 
-vector<double> s1(DTW_LEN), s2(DTW_LEN);
+vector<uint16_t> s1(DTW_LEN), s2(DTW_LEN);
 void read()
 {
     for (int i = 0;i < DTW_LEN;i ++)
@@ -32,7 +32,7 @@ int main() {
     ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
     Dtw dtw;
     read();
-    // write();
+    write();
 
     double ret = dtw.get_cost(s1, s2, 20);
     cout << ret << endl;
