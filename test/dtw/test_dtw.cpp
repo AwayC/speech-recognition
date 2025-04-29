@@ -4,7 +4,7 @@
 #include "dtw.h"
 #include "iostream"
 
-#define DTW_LEN 1024
+#define DTW_LEN 256
 using namespace std;
 
 vector<double> s1(DTW_LEN), s2(DTW_LEN);
@@ -29,13 +29,12 @@ void write()
 }
 
 int main() {
-    freopen("py.out", "r", stdin);
-    freopen("test.out", "w", stdout);
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
     Dtw dtw;
     read();
     // write();
 
-    double ret = dtw.get_cost(s1, s2, 10);
+    double ret = dtw.get_cost(s1, s2, 20);
     cout << ret << endl;
     return 0;
 }
