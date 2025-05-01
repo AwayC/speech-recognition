@@ -7,24 +7,32 @@
 #define DTW_LEN 32
 using namespace std;
 
-vector<uint16_t> s1(DTW_LEN), s2(DTW_LEN);
+using vec = vector<float>;
+#define VEC_LEN 1
+vector<vec> s1(DTW_LEN, vec(1)), s2(DTW_LEN, vec(1));
 void read()
 {
     for (int i = 0;i < DTW_LEN;i ++)
     {
-        cin >> s1[i];
+        for (int j = 0;j < VEC_LEN;j ++)
+            cin >> s1[i][j];
     }
     for (int i = 0;i < DTW_LEN;i ++)
     {
-        cin >> s2[i];
+        for (int j = 0;j < VEC_LEN;j ++)
+            cin >> s2[i][j];
     }
 }
 
 void write()
 {
-    for (int i = 0;i < DTW_LEN;i ++) cout << s1[i] << " ";
+    for (int i = 0;i < DTW_LEN;i ++)
+        for (int j = 0;j < VEC_LEN;j ++)
+            cout << s1[i][j] << ' ' ;
     cout << endl;
-    for (int i = 0;i < DTW_LEN;i ++) cout << s2[i] << " ";
+    for (int i = 0;i < DTW_LEN;i ++)
+        for (int j = 0;j < VEC_LEN;j ++)
+            cout << s2[i][j] << ' ' ;
     cout << endl;
 }
 
@@ -34,7 +42,7 @@ int main() {
     read();
     write();
 
-    double ret = dtw.get_cost(s1, s2, 20);
+    float ret = dtw.get_cost(s1, s2, 20);
     cout << ret << endl;
     return 0;
 }

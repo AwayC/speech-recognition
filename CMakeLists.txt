@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_library(dtw dtw/dtw.cpp dtw/dtw.h)
 
+add_library(mcff mcff/mcff.cpp mcff/mcff.h)
+target_include_directories(mcff PRIVATE mcff/fft/fft.h mcff/fft/Complex.h)
+
+
 add_executable(test_dtw test/dtw/test_dtw.cpp)
 
 # 修改这一行，指定头文件所在的目录
