@@ -24,11 +24,7 @@ class Dtw {
     using mcVec = std::vector<float>; 
 public: 
     Dtw(){}; 
-    ~Dtw()
-    {
-        buf.~vector();
-        path.~vector();
-    };
+    ~Dtw() {};
     float get_cost(const std::vector<mcVec>& src,
                  const std::vector<mcVec> &t,
                  int radius);
@@ -38,7 +34,7 @@ public:
     }
     float Fast_dtw(Ts &src, Ts &t, int radius);
     float Path_dtw(Ts &src, Ts &t, Win *w);
-    void set_brkVal(int x)
+    void set_brkVal(float x)
     {
         break_val = x;
     };
