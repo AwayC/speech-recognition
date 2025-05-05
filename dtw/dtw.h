@@ -43,7 +43,7 @@ public:
 private: 
     float break_val = MAX_BREAK;
     std::vector<mcVec> buf;
-    size_t Vec_len = 1;
+    size_t Vec_len = 13;
     size_t buf_len; 
     std::vector<pathPoint> path; 
     float distance(const mcVec& a, const mcVec& b);

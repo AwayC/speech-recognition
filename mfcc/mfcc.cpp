@@ -4,17 +4,22 @@
 
 #include "mfcc.h"
 
-
 #ifdef Debug
 #include <iostream>
 #endif
 
 void Mfcc::init()
 {
+#ifdef Debug
+    std::cerr << "INIT" << std::endl;
+#endif
     signal.resize(in_len);
     hamming_window_init();
     mel_init();
     dct_init();
+#ifdef Debug
+    std::cerr << "INIT_DONE" << std::endl;
+#endif
 }
 
 void Mfcc::pre_emphasis(float alpha)
@@ -54,6 +59,9 @@ void Mfcc::hamming_window_init()
 
 void Mfcc::mel_init()
 {
+#ifdef Debug
+    std::cout << "mel_filter" << std::endl;
+#endif
     float low_f = 0;
     float high_f = freq / 2;
     high_f = 2595 * log10(1 + high_f / 700);
@@ -69,8 +77,9 @@ void Mfcc::mel_init()
         std::cout << ret << " ";
 #endif
     }
+
 #ifdef Debug
-    std::cout << "mel_filter" << std::endl;
+    std::cout  << std::endl;
 #endif
 
 }
@@ -105,7 +114,7 @@ void Mfcc::hamming_window()
 #endif
 }
 
-void Mfcc::get_mfcc(float* input, size_t ilen, mcVec& output)
+int Mfcc::get_mfcc(float* input, size_t ilen, mcVec& output)
 {
     assert(ilen == in_len);
     std::vector<Complex> sig(in_len);
@@ -118,11 +127,18 @@ void Mfcc::get_mfcc(float* input, size_t ilen, mcVec& output)
     // fft
     for (int i = 0;i < in_len;i ++)
         sig[i] = Complex(signal[i], 0);
+#ifdef Debug
+    std::cerr << in_len << std::endl;
+#endif
     FastFourier fft(in_len);
     fft.transform(sig);
     double energy = 0;
     for (int i = 0;i < in_len;i ++)
         signal[i] = sig[i].abs(), energy += signal[i] * signal[i];
+    if (energy < 1e-6)
+    {
+        return MFCC_ENERGY_ZERO;
+    }
 #ifdef Debug
     std::cout << "FFT" << std::endl;
     for (int i = 0;i < 10;i ++)
@@ -143,7 +159,7 @@ void Mfcc::get_mfcc(float* input, size_t ilen, mcVec& output)
         float sum = 0;
         for (int j = f_m_mn;j < f_m;j ++)
         {
-            sum += signal[j] * (j - f_m_mn) / (f_m - f_m_mn);
+            sum += 2 * signal[j] * (j - f_m_mn) / (f_m - f_m_mn);
         }
         for (int j = f_m;j < f_m_mx;j ++)
         {
@@ -153,12 +169,12 @@ void Mfcc::get_mfcc(float* input, size_t ilen, mcVec& output)
     }
 #ifdef Debug
     std::cout << "MEL" << std::endl;
-    for (int i = 0;i < mel_num;i ++)
+    for (int i = 0;i <= mel_num + 1;i ++)
     {
         std::cout << mel_filter[i] << " ";
     }
     std::cout << std::endl;
-    for (int i = 0;i < mel_num;i ++)
+    for (int i = 0;i <= mel_num + 1;i ++)
     {
         std::cout << result[i] << " " ;
     }
@@ -173,11 +189,12 @@ void Mfcc::get_mfcc(float* input, size_t ilen, mcVec& output)
         {
             sum += result[j] * dct_cos[i][j];
         }
-#if 1
+#if 0
         output[i] = sum * sqrtf(2.0f / (float)mel_num) * (1.0f + 0.5f * mel_num * sinf(PI * i / mel_num));
 #else
-        output[i] = sum;
+        output[i] = sum * sqrtf(2.0f / (float)mel_num); 
 #endif
     }
+    return MFCC_OK;
 
 }

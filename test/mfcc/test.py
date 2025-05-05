@@ -16,7 +16,7 @@ def librosa_mfcc(y, sr) :
         win_length = 256,
         hop_length = 257,
         window = 'hamming',
-        n_mels = 26,
+        n_mels = 28,
         htk = True,
         power = 1.0,
         center = False,
@@ -27,8 +27,6 @@ def librosa_mfcc(y, sr) :
 mfcc_librosa = librosa_mfcc(all_data, 8000)
 
 # print(mfcc_librosa)
-print("原始信号前5点:", all_data[:5])
-print(all_data[0] - 0.97 * all_data[-1])
 y_emph = librosa.effects.preemphasis(all_data[:256], coef=0.97)
 print("预加重结果样本:", y_emph[:5])
 
@@ -68,13 +66,15 @@ print("幅度谱前5点:", D[:5, 0])
 mel_basis = librosa.filters.mel(
     sr=8000,
     n_fft=256,
-    n_mels=26,
+    n_mels=28,
     htk=True,
     fmin=0,
-    fmax=4000
+    fmax=4000,
+    norm=None
 )
-print("首个梅尔滤波器:", mel_basis[0, :5], sum(mel_basis[2])); 
-print("Mel中心频率:", librosa.mel_frequencies(n_mels=26, fmin=0, fmax=4000, htk=True))
+
+print("首个梅尔滤波器:", mel_basis[1, :10], sum(mel_basis[2])); 
+print("Mel中心频率:", librosa.mel_frequencies(n_mels=28, fmin=0, fmax=4000, htk=True))
 # 5. 计算梅尔能量
 mel_energy = np.dot(mel_basis, D[:, 0])
 print("梅尔能量uem:", mel_energy)

@@ -4,17 +4,23 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+// #define Debug
+// #define LIMIT
 #define pr(x) std::cerr << #x << ": " << x << std::endl;
 
 float Dtw::distance(const mcVec& a, const mcVec& b) {
-    float ret = 0; 
-    for(int i = 0;i < Vec_len;i ++) { 
-        ret += fabs(a[i] - b[i]);
+    float ret = 0, res;
+    for(int i = 0;i < Vec_len;i ++) {
+        ret += fabs(a[i] - b[i]) * fabs(b[i] - a[i]);
     }
     return ret;
 }
 
 float Dtw::get_cost(const std::vector<mcVec>& src, const std::vector<mcVec> &t, int radius) {
+#ifdef Debug
+    pr(src.size());
+    pr(t.size());
+#endif
     assert(src.size() > 0 && t.size() > 0);
     assert(src[0].size() == Vec_len && t[0].size() == Vec_len);
     Ts s = {0, src.size()}; 
@@ -25,7 +31,7 @@ float Dtw::get_cost(const std::vector<mcVec>& src, const std::vector<mcVec> &t, 
         buf[i] = src[i];
     for (int i = ts.head;i < ts.head + ts.len;i ++)
         buf[i] = t[i - ts.head];
-    int ret = Fast_dtw(s, ts, radius);
+    float ret = Fast_dtw(s, ts, radius);
     buf_len = 0;
     buf.clear(); 
     path.clear();
@@ -52,7 +58,7 @@ float Dtw::Fast_dtw(Ts &src, Ts &t, int radius) {
     coarse(src, s1);
     coarse(t, s2);
 
-    int ret = Fast_dtw(s1, s2, radius);
+    float ret = Fast_dtw(s1, s2, radius);
 
     if (ret == -1.0)
     {
@@ -71,7 +77,7 @@ float Dtw::Fast_dtw(Ts &src, Ts &t, int radius) {
 }
 
 #define PATH_MX 0x3f3f3f3f
-#define COST_MX 1e9
+#define COST_MX 1e16
 float Dtw::Path_dtw(Ts &src, Ts &t, Win *w)  {
     size_t len1 = src.len, len2 = t.len;
     float brk = break_val * (len1 + len2) * Vec_len;
@@ -119,12 +125,15 @@ float Dtw::Path_dtw(Ts &src, Ts &t, Win *w)  {
             prev[i][j] = mn_prev;
             mn = std::min(mn, cost[i][j]);
         }
+#ifdef LIMIT
         if (mn > brk)
         {
             brk_flag = true;
             break;
         }
+#endif
     }
+#ifdef LIMIT
     if (brk_flag)
     {
         path.clear();
@@ -132,6 +141,7 @@ float Dtw::Path_dtw(Ts &src, Ts &t, Win *w)  {
         prev.clear();
         return -1;
     }
+#endif
     path.clear();
     int x = len1 - 1, y = len2 - 1;
     while (~x && ~y)
@@ -150,12 +160,12 @@ float Dtw::Path_dtw(Ts &src, Ts &t, Win *w)  {
 }
 
 void Dtw::coarse(Ts &src, Ts &t) {
-    std::cerr << "coarse" << std::endl;
-    pr(src.head);
-    pr(src.len);
-    pr(t.head);
-    pr(t.len);
-    pr(buf.size());
+    // std::cerr << "coarse" << std::endl;
+    // pr(src.head);
+    // pr(src.len);
+    // pr(t.head);
+    // pr(t.len);
+    // pr(buf.size());
     for (int i = 0;i < src.len;i += 2)
     {
         int ptr = i / 2 + t.head;

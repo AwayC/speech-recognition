@@ -1,0 +1,4 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/aarch64/ninja -G Ninja -DPython_EXECUTABLE=/Users/away/Desktop/codes/Speech-recognition/.venv/bin/python -DPython3_EXECUTABLE=/Users/away/Desktop/codes/Speech-recognition/.venv/bin/python -S /Users/away/Desktop/codes/Speech-recognition -B /Users/away/Desktop/codes/Speech-recognition/cmake-build-debug
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/away/Desktop/codes/Speech-recognition/cmake-build-debug

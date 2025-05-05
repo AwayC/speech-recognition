@@ -1,0 +1,7 @@
+/Users/away/Desktop/codes/Speech-recognition/cmake-build-debug/CMakeFiles/dtw.dir
+/Users/away/Desktop/codes/Speech-recognition/cmake-build-debug/CMakeFiles/mfcc.dir
+/Users/away/Desktop/codes/Speech-recognition/cmake-build-debug/CMakeFiles/test_dtw.dir
+/Users/away/Desktop/codes/Speech-recognition/cmake-build-debug/CMakeFiles/test_mfcc.dir
+/Users/away/Desktop/codes/Speech-recognition/cmake-build-debug/CMakeFiles/get_audio.dir
+/Users/away/Desktop/codes/Speech-recognition/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/away/Desktop/codes/Speech-recognition/cmake-build-debug/CMakeFiles/rebuild_cache.dir

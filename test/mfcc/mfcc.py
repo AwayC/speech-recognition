@@ -2,6 +2,7 @@ import numpy as np
 import wave
 import matplotlib.pyplot as plt
 from scipy.fftpack import dct
+import librosa 
 
 def pre_emphasis(signal, alpha=0.97):
     """
@@ -59,6 +60,8 @@ def mel_filterbank(num_filters, NFFT, sample_rate):
     mel_points = np.linspace(low_freq_mel, high_freq_mel, num_filters + 2)  # 均匀分布 Mel 频率
     hz_points = 700 * (10**(mel_points / 2595) - 1)  # 转换回 Hz 频率
     bin = np.floor((NFFT + 1) * hz_points / sample_rate)
+    print("bin", bin)
+    print("hz", hz_points)
 
     fbank = np.zeros((num_filters, int(np.floor(NFFT / 2 + 1))))
     for m in range(1, num_filters + 1):
@@ -71,7 +74,22 @@ def mel_filterbank(num_filters, NFFT, sample_rate):
         for k in range(f_m, f_m_plus):
             fbank[m - 1, k] = (bin[m + 1] - k) / (bin[m + 1] - bin[m])
     return fbank
-
+def librosa_mfcc(y, sr) :
+    return librosa.feature.mfcc(
+        y = y, 
+        sr = sr, 
+        n_mfcc = 13, 
+        n_fft = 1024,
+        win_length = 1024,
+        hop_length = 513,
+        window = 'hamming',
+        n_mels = 28,
+        htk = True,
+        power = 1.0,
+        center = False,
+        dct_type=2,
+        norm = None,
+    )
 # 读取音频文件
 try:
     f = wave.open(r"amtls.wav", "rb")
@@ -82,8 +100,14 @@ else:
     nchannels, sampwidth, framerate, nframes = params[:4]
     str_data = f.readframes(nframes)
     signal = np.frombuffer(str_data, dtype=np.short)
+    
     signal = signal * 1.0 / (max(abs(signal)))
-
+    print("framerate", framerate)
+    print("frame num", nframes)
+    for i in signal: 
+        print(i, end=" ")
+    print("\n")
+    print("max", max(signal))
     # 预加重
     alpha = 0.97
     emphasized_signal = pre_emphasis(signal, alpha)
@@ -98,69 +122,80 @@ else:
     frames = frames * win
 
     # FFT 参数
-    NFFT = 512
+    NFFT = 1024
     mag_frames = np.absolute(np.fft.rfft(frames, NFFT))
-
     # 功率谱
     pow_frames = ((1.0 / NFFT) * ((mag_frames) ** 2))
 
     # Mel 滤波器组参数
     num_filters = 26
     fbank = mel_filterbank(num_filters, NFFT, framerate)
-    filter_banks = np.dot(pow_frames, fbank.T)
+    filter_banks = np.dot(mag_frames, fbank.T)
     filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)  # 数值稳定性
-    filter_banks = 20 * np.log10(filter_banks)  # dB
+    filter_banks = np.log10(filter_banks)  # dB
+    print("filter_banks", filter_banks[0])
 
     # DCT 参数
-    num_ceps = 12
-    mfcc_coeffs = dct(filter_banks, type=2, axis=1, norm='ortho')[:, 1: (num_ceps + 1)]
+    num_ceps = 13
+    mfcc_coeffs = dct(filter_banks, type=2, axis=1, norm="ortho")[:, 0: (num_ceps + 1)]
+    print("mfcc_coeffs", mfcc_coeffs[0])
 
+
+    mfcc_raw = dct(filter_banks, type=2, axis=1, norm=None)[:, 0: (num_ceps + 1)]
+    print("mfcc_coeffs", mfcc_raw[0])
     # 绘图
     time = np.arange(0, len(signal)) / framerate
-
-    # 原始信号
-    plt.figure(figsize=(12, 10))
-    plt.subplot(4, 1, 1)
-    plt.plot(time, signal)
-    plt.title('Original Audio Signal')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-
-    # 预加重后的信号
-    plt.subplot(4, 1, 2)
-    plt.plot(time, emphasized_signal)
-    plt.title('Pre - emphasized Audio Signal')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-
-    # 分帧加窗后的一帧信号
-    plt.subplot(4, 1, 3)
-    plt.plot(frames[4])
-    plt.title('A Framed and Windowed Signal')
-    plt.xlabel('Sample')
-    plt.ylabel('Amplitude')
-
-    # Mel 滤波器组
-    plt.subplot(4, 1, 4)
-    for filter in fbank:
-        plt.plot(filter)
-    plt.title('Mel Filter Bank')
-    plt.xlabel('Frequency (bin)')
-    plt.ylabel('Amplitude')
-
-    plt.tight_layout()
-    plt.savefig('audio_processing_steps.png', dpi=300)  # 保存第一个图表
-    plt.show()
-
-    # MFCC 系数热力图
+    mfcc_lib = librosa_mfcc(signal, framerate)
+    print("mfcc_coeffs", mfcc_lib[0])
     plt.figure(figsize=(10, 6))
-    plt.imshow(np.swapaxes(mfcc_coeffs, 0, 1), cmap='viridis', origin='lower', 
-               extent=[0, mfcc_coeffs.shape[0], 1, mfcc_coeffs.shape[1]])
+    plt.plot(mfcc_lib[0, : ], label='MFCC Coefficients')
     plt.title('MFCC Coefficients')
     plt.xlabel('Frame')
     plt.ylabel('MFCC Coefficient')
-    plt.colorbar()
     plt.savefig('mfcc_coefficients.png', dpi=300)  # 保存第二个图表
     plt.show()
+    # 原始信号
+    # plt.figure(figsize=(12, 10))
+    # plt.subplot(4, 1, 1)
+    # plt.plot(time, signal)
+    # plt.title('Original Audio Signal')
+    # plt.xlabel('Time (s)')
+    # plt.ylabel('Amplitude')
 
-    print("MFCC coefficients shape:", mfcc_coeffs.shape)
+    # # 预加重后的信号
+    # plt.subplot(4, 1, 2)
+    # plt.plot(time, emphasized_signal)
+    # plt.title('Pre - emphasized Audio Signal')
+    # plt.xlabel('Time (s)')
+    # plt.ylabel('Amplitude')
+
+    # # 分帧加窗后的一帧信号
+    # plt.subplot(4, 1, 3)
+    # plt.plot(frames[4])
+    # plt.title('A Framed and Windowed Signal')
+    # plt.xlabel('Sample')
+    # plt.ylabel('Amplitude')
+
+    # # Mel 滤波器组
+    # plt.subplot(4, 1, 4)
+    # for filter in fbank:
+    #     plt.plot(filter)
+    # plt.title('Mel Filter Bank')
+    # plt.xlabel('Frequency (bin)')
+    # plt.ylabel('Amplitude')
+
+    # plt.tight_layout()
+    # plt.savefig('audio_processing_steps.png', dpi=300)  # 保存第一个图表
+    # plt.show()
+
+    # # MFCC 系数热力图
+    # plt.figure(figsize=(10, 6))
+    # plt.imshow(np.swapaxes(mfcc_coeffs, 0, 1), cmap='viridis', origin='lower', 
+    #            extent=[0, mfcc_coeffs.shape[0], 1, mfcc_coeffs.shape[1]])
+    # plt.title('MFCC Coefficients')
+    # plt.xlabel('Frame')
+    # plt.ylabel('MFCC Coefficient')
+    # plt.colorbar()
+    # plt.savefig('mfcc_coefficients.png', dpi=300)  # 保存第二个图表
+    # plt.show()
+

@@ -8,6 +8,11 @@
 #include "fft/fft.h"
 #include "cmath"
 #define PI acos(-1.0)
+enum
+{
+    MFCC_ENERGY_ZERO = 0,
+    MFCC_OK
+};
 
 class Mfcc {
   using mcVec = std::vector<float>;
@@ -15,7 +20,7 @@ public:
     Mfcc(size_t ilen, int olen,  int f) : freq(f), in_len(ilen), mel_num(olen) {};
     
     void init();
-    void get_mfcc(float* input, size_t ilen, mcVec& output);
+    int get_mfcc(float* input, size_t ilen, mcVec& output);
 
 private:
     int freq;
