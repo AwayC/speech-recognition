@@ -1,0 +1,1 @@
+../cmake-build-debug/max9814 < max9814.out > test.out
